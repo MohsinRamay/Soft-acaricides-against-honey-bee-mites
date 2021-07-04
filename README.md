@@ -1,1 +1,1 @@
-# Soft-acaricides-against-honey-bee-mitesTIC-MITE-
+# Soft-acaricides-against-honey-bee-mites
