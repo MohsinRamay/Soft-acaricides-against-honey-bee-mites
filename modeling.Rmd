@@ -1,0 +1,261 @@
+% Modeling
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  R.options = list(width = 60)
+)
+```
+
+# Setup
+
+## Load libraries
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(lme4)
+library(arm)
+library(GAD)
+library(lmerTest)
+```
+
+## Read data
+
+```{r warning=FALSE}
+# Mites data
+mites <- read_csv("data/mites.csv")
+
+# Yield and Efficacy data
+efficacy <- read_excel("data/efficacy.xlsx")
+```
+
+### Indexing Replications
+
+```{r}
+mites <- mites %>%
+  group_by(Week, Treatment, Conc.) %>%
+  mutate(Rep = row_number())
+```
+
+
+# Data analysis
+
+## Three Treatment Groups
+
+### Mortality
+
+-   The data was not normal, so we took natural lag of the mites data.
+
+```{r}
+# Model
+lme <- lmer(log(value) ~ Treatment + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+
+
+# Residuals
+library(DHARMa)
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+```{r}
+library(emmeans)
+library(multcomp)
+
+means <- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans, Letters = LETTERS)
+```
+
+**Scott-Knott**
+
+```{r}
+library(ScottKnott)
+skm <- with(mites,
+              SK(x= Treatment,
+                 y=log(value),
+                 model='y ~ x',
+                 which='x'))
+
+skm <- summary(skm)
+```
+
+
+### Efficacy
+
+```{r}
+# Model
+lme <- lmer(Efficacy ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+```{r}
+means <- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans)
+```
+
+**Scott-Knott**
+
+```{r}
+ske <- with(efficacy,
+              SK(x= Treatment,
+                 y=Efficacy,
+                 model='y ~ x',
+                 which='x'))
+
+ske <- summary(ske)
+```
+
+### Honey Yield
+
+```{r}
+# Model
+lme <- lmer(Honey_Yield ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+
+```{r}
+means <- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans)
+```
+
+**Scott-Knott**
+
+```{r}
+sky <- with(efficacy,
+              SK(x= Treatment,
+                 y=Honey_Yield,
+                 model='y ~ x',
+                 which='x'))
+
+sky <- summary(sky)
+```
+
+
+## Nine Treatment Groups
+
+### Mortality
+
+```{r}
+# Model
+lme <- lmer(log(value) ~ Treatments + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+
+
+# Residuals
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+```{r}
+means <- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans, Letters = LETTERS)
+```
+
+**Scott-Knott**
+
+```{r}
+skm <- with(mites,
+              SK(x= Treatments,
+                 y=log(value),
+                 model='y ~ x',
+                 which='x'))
+
+skm <- summary(skm)
+```
+
+### Efficacy
+
+```{r}
+# Model
+lme <- lmer(Efficacy ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+```{r}
+means <- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans)
+```
+
+**Scott-Knott**
+
+```{r}
+ske <- with(efficacy,
+              SK(x = Treatments,
+                 y = Efficacy,
+                 model='y ~ x',
+                 which='x'))
+
+ske <- summary(ske)
+```
+
+### Honey Yield
+
+```{r}
+# Model
+lme <- lmer(Honey_Yield ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres <- simulateResiduals(lme)
+plot(simres)
+
+# ANOVA
+anova(lme)
+```
+
+**Multiple comparison**
+
+```{r}
+means <- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans)
+```
+
+**Scott-Knott**
+
+```{r}
+sky <- with(efficacy,
+              SK(x= Treatments,
+                 y=Honey_Yield,
+                 model='y ~ x',
+                 which='x'))
+
+sky <- summary(sky)
+```

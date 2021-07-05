@@ -1,0 +1,117 @@
+% Data
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  R.options = list(width = 60)
+)
+```
+
+# Setup
+
+## Load libraries
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(skimr)
+```
+
+## Read data
+
+```{r warning=FALSE}
+# Mites data
+mites <- read_csv("data/mites.csv")
+
+# Yield and Efficacy data
+efficacy <- read_excel("data/efficacy.xlsx")
+```
+
+# Exploratory data analysis
+
+## Mites data
+
+```{r}
+skim(mites)
+```
+
+## Efficacy and Yield data
+
+```{r}
+skim(efficacy)
+```
+
+## Observations
+
+- Observations were made for 4 weeks.
+- Each week, 3 chemicals were tested.
+- Each chemical was tested using 3 different concentrations.
+- The experiment was designed using 5 replications
+
+```{r}
+library(janitor)
+
+# 3 treatments
+mites %>% 
+   tabyl(Week, Treatment)
+
+# 9 treatments
+efficacy %>% 
+   tabyl(Treatments)
+```
+
+## Data spread
+
+### Mites
+
+**Treatment x Weeks**
+
+```{r}
+my_palette <- colorRampPalette(c("forestgreen", "orange", "red"))(n = 299)
+
+ggplot(mites, aes(x = as.factor(Week), y = value)) +
+  geom_boxplot(alpha = 0) +
+  geom_jitter(aes(colour = value), position = position_jitter(0.2), alpha = 0.5) +
+  scale_colour_gradientn(colours = my_palette) +
+  labs(x = "Week", y = "Mites", color = "Mites") +
+  theme_bw() +
+  facet_wrap(Treatment ~ .)
+```
+
+**Treatment x Weeks x Concentrations**
+
+```{r}
+ggplot(mites, aes(x = as.factor(Week), y = value)) +
+  geom_boxplot(alpha = 0) +
+  geom_jitter(aes(colour = value), position = position_jitter(0.2), alpha = 0.5) +
+  scale_colour_gradientn(colours = my_palette) +
+  labs(x = "Week", y = "Mites", color = "Mites") +
+  theme_bw() +
+  facet_grid(Treatment ~ Conc.)
+```
+
+### Efficacy 
+
+```{r}
+ggplot(efficacy, aes(x = Treatments, y = Efficacy)) +
+  geom_boxplot(alpha = 0) +
+  geom_jitter(aes(colour = Efficacy), position = position_jitter(0.2), alpha = 0.5) +
+  scale_colour_gradientn(colours = my_palette) +
+  labs(x = "Treatment", y = "Efficacy (%)") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+### Yield data 
+
+```{r}
+ggplot(efficacy, aes(x = Treatments, y = Honey_Yield)) +
+  geom_boxplot(alpha = 0) +
+  geom_jitter(aes(colour = Honey_Yield), position = position_jitter(0.2), alpha = 0.5) +
+  scale_colour_gradientn(colours = my_palette) +
+  labs(x = "Treatment", y = "Honey yield (kg)", color = "Honey yield") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```

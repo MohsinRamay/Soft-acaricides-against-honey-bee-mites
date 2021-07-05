@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Modeling</title>
+
+<script src="site_libs/header-attrs-2.9/header-attrs.js"></script>
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet" />
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+.tocify-subheader {
+  display: inline;
+}
+.tocify-subheader .tocify-item {
+  font-size: 0.95em;
+}
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Effectiveness of different soft acaricides against honeybee ectoparasitic mite</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="index.html">
+    <span class="fa fa-home"></span>
+     
+    About
+  </a>
+</li>
+<li>
+  <a href="data.html">
+    <span class="fa fa-table"></span>
+     
+    Data
+  </a>
+</li>
+<li>
+  <a href="modeling.html">
+    <span class="fa fa-file-code-o"></span>
+     
+    Documented analysis
+  </a>
+</li>
+<li>
+  <a href="figures.html">
+    <span class="fa fa-bar-chart"></span>
+     
+    Publication-ready plots
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Modeling</h1>
+
+</div>
+
+
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(readxl)
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(lme4)
+library(arm)
+library(GAD)
+library(lmerTest)</code></pre>
+</div>
+<div id="read-data" class="section level2">
+<h2>Read data</h2>
+<pre class="r"><code># Mites data
+mites &lt;- read_csv(&quot;data/mites.csv&quot;)
+
+# Yield and Efficacy data
+efficacy &lt;- read_excel(&quot;data/efficacy.xlsx&quot;)</code></pre>
+<div id="indexing-replications" class="section level3">
+<h3>Indexing Replications</h3>
+<pre class="r"><code>mites &lt;- mites %&gt;%
+  group_by(Week, Treatment, Conc.) %&gt;%
+  mutate(Rep = row_number())</code></pre>
+</div>
+</div>
+</div>
+<div id="data-analysis" class="section level1">
+<h1>Data analysis</h1>
+<div id="three-treatment-groups" class="section level2">
+<h2>Three Treatment Groups</h2>
+<div id="mortality" class="section level3">
+<h3>Mortality</h3>
+<ul>
+<li>The data was not normal, so we took natural lag of the mites data.</li>
+</ul>
+<pre class="r"><code># Model
+lme &lt;- lmer(log(value) ~ Treatment + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+
+
+# Residuals
+library(DHARMa)
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"2.057818","2":"1.028909","3":"2","4":"168","5":"7.800777","6":"0.0005759251","_rn_":"Treatment"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>library(emmeans)
+library(multcomp)
+
+means &lt;- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans, Letters = LETTERS)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatment"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Oxalic Acid","2":"2.914691","3":"0.2347734","4":"8.377592","5":"2.377520","6":"3.451861","7":"A","_rn_":"2"},{"1":"Formic Acid 65%","2":"2.936846","3":"0.2347734","4":"8.377592","5":"2.399676","6":"3.474016","7":"A","_rn_":"1"},{"1":"Thymol","2":"3.151771","3":"0.2347734","4":"8.377592","5":"2.614601","6":"3.688942","7":"B","_rn_":"3"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>library(ScottKnott)
+skm &lt;- with(mites,
+              SK(x= Treatment,
+                 y=log(value),
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+skm &lt;- summary(skm)</code></pre>
+<pre><code>##           Levels    Means SK(5%)
+##           Thymol 3.151771      a
+##  Formic Acid 65% 2.936846      b
+##      Oxalic Acid 2.914691      b</code></pre>
+</div>
+<div id="efficacy" class="section level3">
+<h3>Efficacy</h3>
+<pre class="r"><code># Model
+lme &lt;- lmer(Efficacy ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"3468.055","2":"1734.028","3":"2","4":"40","5":"34.03743","6":"2.32652e-09","_rn_":"Treatment"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>means &lt;- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatment"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Formic Acid 65%","2":"69.29151","3":"4.833429","4":"2.448397","5":"51.75032","6":"86.83269","7":"1","_rn_":"1"},{"1":"Thymol","2":"76.74475","3":"4.833429","4":"2.448397","5":"59.20357","6":"94.28593","7":"2","_rn_":"3"},{"1":"Oxalic Acid","2":"90.48645","3":"4.833429","4":"2.448397","5":"72.94527","6":"108.02764","7":"3","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>ske &lt;- with(efficacy,
+              SK(x= Treatment,
+                 y=Efficacy,
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+ske &lt;- summary(ske)</code></pre>
+<pre><code>##           Levels    Means SK(5%)
+##      Oxalic Acid 90.48645      a
+##           Thymol 76.74475      b
+##  Formic Acid 65% 69.29151      c</code></pre>
+</div>
+<div id="honey-yield" class="section level3">
+<h3>Honey Yield</h3>
+<pre class="r"><code># Model
+lme &lt;- lmer(Honey_Yield ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"341.9111","2":"170.9556","3":"2","4":"40","5":"47.50232","6":"2.717855e-11","_rn_":"Treatment"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>means &lt;- emmeans(lme, pairwise ~ Treatment)
+cld(means$emmeans)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatment"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Thymol","2":"7.266667","3":"1.103731","4":"2.641879","5":"3.468750","6":"11.06458","7":"1","_rn_":"3"},{"1":"Formic Acid 65%","2":"7.733333","3":"1.103731","4":"2.641879","5":"3.935417","6":"11.53125","7":"1","_rn_":"1"},{"1":"Oxalic Acid","2":"13.333333","3":"1.103731","4":"2.641879","5":"9.535417","6":"17.13125","7":"2","_rn_":"2"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>sky &lt;- with(efficacy,
+              SK(x= Treatment,
+                 y=Honey_Yield,
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+sky &lt;- summary(sky)</code></pre>
+<pre><code>##           Levels     Means SK(5%)
+##      Oxalic Acid 13.333333      a
+##  Formic Acid 65%  7.733333      b
+##           Thymol  7.266667      b</code></pre>
+</div>
+</div>
+<div id="nine-treatment-groups" class="section level2">
+<h2>Nine Treatment Groups</h2>
+<div id="mortality-1" class="section level3">
+<h3>Mortality</h3>
+<pre class="r"><code># Model
+lme &lt;- lmer(log(value) ~ Treatments + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+
+
+# Residuals
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"15.65851","2":"1.957314","3":"8","4":"164.0001","5":"36.38903","6":"1.182466e-32","_rn_":"Treatments"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>means &lt;- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans, Letters = LETTERS)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatments"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Oxalic Acid 2.10%","2":"2.433866","3":"0.2459064","4":"18.79841","5":"1.918804","6":"2.948928","7":"AB","_rn_":"4"},{"1":"Thymol 6gm","2":"2.528478","3":"0.2459064","4":"18.79841","5":"2.013416","6":"3.043540","7":"A C","_rn_":"9"},{"1":"Formic Acid 65% 20ml","2":"2.834824","3":"0.2459064","4":"18.79841","5":"2.319762","6":"3.349886","7":"B DE","_rn_":"3"},{"1":"Formic Acid 65% 10ml","2":"2.887778","3":"0.2459064","4":"18.79841","5":"2.372716","6":"3.402840","7":"CD F","_rn_":"1"},{"1":"Formic Acid 65% 15ml","2":"3.087936","3":"0.2459064","4":"18.79841","5":"2.572874","6":"3.602998","7":"ABCDEFG","_rn_":"2"},{"1":"Oxalic Acid 3.2%","2":"3.136599","3":"0.2459064","4":"18.79841","5":"2.621537","6":"3.651661","7":"CDEFG","_rn_":"5"},{"1":"Oxalic Acid 4.20%","2":"3.173607","3":"0.2459064","4":"18.79841","5":"2.658545","6":"3.688669","7":"FGH","_rn_":"6"},{"1":"Thymol 2gm","2":"3.338636","3":"0.2459064","4":"18.79841","5":"2.823574","6":"3.853698","7":"E GH","_rn_":"7"},{"1":"Thymol 4gm","2":"3.588200","3":"0.2459064","4":"18.79841","5":"3.073138","6":"4.103261","7":"H","_rn_":"8"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>skm &lt;- with(mites,
+              SK(x= Treatments,
+                 y=log(value),
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+skm &lt;- summary(skm)</code></pre>
+<pre><code>##                Levels    Means SK(5%)
+##            Thymol 4gm 3.588200      a
+##            Thymol 2gm 3.338636      a
+##     Oxalic Acid 4.20% 3.173607      b
+##      Oxalic Acid 3.2% 3.136599      b
+##  Formic Acid 65% 15ml 3.087936      b
+##  Formic Acid 65% 10ml 2.887778      c
+##  Formic Acid 65% 20ml 2.834824      c
+##            Thymol 6gm 2.528478      d
+##     Oxalic Acid 2.10% 2.433866      d</code></pre>
+</div>
+<div id="efficacy-1" class="section level3">
+<h3>Efficacy</h3>
+<pre class="r"><code># Model
+lme &lt;- lmer(Efficacy ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"5521.991","2":"690.2489","3":"8","4":"32.00022","5":"838.4414","6":"6.376987e-35","_rn_":"Treatments"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>means &lt;- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatments"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Formic Acid 65% 10ml","2":"54.13464","3":"1.526671","4":"6532.819","5":"51.14187","6":"57.12742","7":"1","_rn_":"1"},{"1":"Formic Acid 65% 15ml","2":"66.08801","3":"1.526671","4":"6532.819","5":"63.09524","6":"69.08079","7":"2","_rn_":"2"},{"1":"Thymol 2gm","2":"71.11146","3":"1.526671","4":"6532.819","5":"68.11868","6":"74.10423","7":"23","_rn_":"7"},{"1":"Thymol 6gm","2":"72.86288","3":"1.526671","4":"6532.819","5":"69.87010","6":"75.85565","7":"3","_rn_":"9"},{"1":"Oxalic Acid 2.10%","2":"83.93614","3":"1.526671","4":"6532.819","5":"80.94336","6":"86.92891","7":"4","_rn_":"4"},{"1":"Thymol 4gm","2":"86.25991","3":"1.526671","4":"6532.819","5":"83.26713","6":"89.25268","7":"45","_rn_":"8"},{"1":"Formic Acid 65% 20ml","2":"87.65186","3":"1.526671","4":"6532.819","5":"84.65909","6":"90.64463","7":"4","_rn_":"3"},{"1":"Oxalic Acid 4.20%","2":"92.68076","3":"1.526671","4":"6532.819","5":"89.68798","6":"95.67353","7":"56","_rn_":"6"},{"1":"Oxalic Acid 3.20%","2":"94.84247","3":"1.526671","4":"6532.819","5":"91.84969","6":"97.83524","7":"6","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>ske &lt;- with(efficacy,
+              SK(x = Treatments,
+                 y = Efficacy,
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+ske &lt;- summary(ske)</code></pre>
+<pre><code>##                Levels    Means SK(5%)
+##     Oxalic Acid 3.20% 94.84247      a
+##     Oxalic Acid 4.20% 92.68076      b
+##  Formic Acid 65% 20ml 87.65186      c
+##            Thymol 4gm 86.25991      d
+##     Oxalic Acid 2.10% 83.93614      e
+##            Thymol 6gm 72.86288      f
+##            Thymol 2gm 71.11146      g
+##  Formic Acid 65% 15ml 66.08801      h
+##  Formic Acid 65% 10ml 54.13464      i</code></pre>
+</div>
+<div id="honey-yield-1" class="section level3">
+<h3>Honey Yield</h3>
+<pre class="r"><code># Model
+lme &lt;- lmer(Honey_Yield ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+
+# Residuals
+simres &lt;- simulateResiduals(lme)
+plot(simres)</code></pre>
+<p><img src="modeling_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<pre class="r"><code># ANOVA
+anova(lme)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Sum Sq"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Mean Sq"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["NumDF"],"name":[3],"type":["int"],"align":["right"]},{"label":["DenDF"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["F value"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["Pr(>F)"],"name":[6],"type":["dbl"],"align":["right"]}],"data":[{"1":"462.6307","2":"57.82884","3":"8","4":"36","5":"46.46961","6":"1.087178e-16","_rn_":"Treatments"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Multiple comparison</strong></p>
+<pre class="r"><code>means &lt;- emmeans(lme, pairwise ~ Treatments)
+cld(means$emmeans)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":[""],"name":["_rn_"],"type":[""],"align":["left"]},{"label":["Treatments"],"name":[1],"type":["fct"],"align":["left"]},{"label":["emmean"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["SE"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["df"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["lower.CL"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["upper.CL"],"name":[6],"type":["dbl"],"align":["right"]},{"label":[".group"],"name":[7],"type":["chr"],"align":["left"]}],"data":[{"1":"Thymol 2gm","2":"5.6","3":"0.7296284","4":"164.7018","5":"4.159369","6":"7.040631","7":"1","_rn_":"7"},{"1":"Thymol 4gm","2":"6.0","3":"0.7296284","4":"164.7018","5":"4.559369","6":"7.440631","7":"1","_rn_":"8"},{"1":"Formic Acid 65% 10ml","2":"6.4","3":"0.7296284","4":"164.7018","5":"4.959369","6":"7.840631","7":"12","_rn_":"1"},{"1":"Formic Acid 65% 20ml","2":"7.6","3":"0.7296284","4":"164.7018","5":"6.159369","6":"9.040631","7":"123","_rn_":"3"},{"1":"Formic Acid 65% 15ml","2":"9.2","3":"0.7296284","4":"164.7018","5":"7.759369","6":"10.640631","7":"234","_rn_":"2"},{"1":"Thymol 6gm","2":"10.2","3":"0.7296284","4":"164.7018","5":"8.759369","6":"11.640631","7":"4","_rn_":"9"},{"1":"Oxalic Acid 2.10%","2":"10.2","3":"0.7296284","4":"164.7018","5":"8.759369","6":"11.640631","7":"345","_rn_":"4"},{"1":"Oxalic Acid 4.20%","2":"13.0","3":"0.7296284","4":"164.7018","5":"11.559369","6":"14.440631","7":"5","_rn_":"6"},{"1":"Oxalic Acid 3.20%","2":"16.8","3":"0.7296284","4":"164.7018","5":"15.359369","6":"18.240631","7":"6","_rn_":"5"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Scott-Knott</strong></p>
+<pre class="r"><code>sky &lt;- with(efficacy,
+              SK(x= Treatments,
+                 y=Honey_Yield,
+                 model=&#39;y ~ x&#39;,
+                 which=&#39;x&#39;))
+
+sky &lt;- summary(sky)</code></pre>
+<pre><code>##                Levels Means SK(5%)
+##     Oxalic Acid 3.20%  16.8      a
+##     Oxalic Acid 4.20%  13.0      b
+##     Oxalic Acid 2.10%  10.2      c
+##            Thymol 6gm  10.2      c
+##  Formic Acid 65% 15ml   9.2      c
+##  Formic Acid 65% 20ml   7.6      d
+##  Formic Acid 65% 10ml   6.4      e
+##            Thymol 4gm   6.0      e
+##            Thymol 2gm   5.6      e</code></pre>
+</div>
+</div>
+</div>
+
+
+
+Copyright 2021 Muhammad Mohsin Raza & Ziyad Abdul Qadir 
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = false;
+    options.smoothScroll = false;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

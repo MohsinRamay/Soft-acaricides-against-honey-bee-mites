@@ -1,0 +1,350 @@
+% Figures
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  R.options = list(width = 60)
+)
+```
+
+# Setup
+
+```{r include=FALSE}
+library(readxl)
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(lme4)
+library(arm)
+library(GAD)
+library(lmerTest)
+```
+
+## Read data
+
+```{r warning=FALSE}
+# Mites data
+mites <- read_csv("data/mites.csv")
+
+# Yield and Efficacy data
+efficacy <- read_excel("data/efficacy.xlsx")
+```
+
+
+```{r, include=FALSE}
+# Indexing Replications
+mites <- mites %>%
+  group_by(Week, Treatment, Conc.) %>%
+  mutate(Rep = row_number())
+```
+
+
+# Graphs
+
+## Three Treatment Groups
+
+### Mortality
+
+```{r}
+library(emmeans)
+library(multcomp)
+
+# Model
+lme <- lmer(log(value) ~ Treatment + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+means <- emmeans(lme, pairwise ~ Treatment)
+```
+
+**Scott-Knott**
+
+```{r}
+library(ScottKnott)
+
+skm <- with(mites,
+              SK(x= Treatment,
+                 y=log(value),
+                 model='y ~ x',
+                 which='x'))
+
+skm <- summary(skm)
+```
+
+**Bar chart**
+
+```{r fig.height=3, fig.width=4, dpi=300}
+p1 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  mutate(emmean = exp(emmean), SE = exp(SE), lower.CL = exp(lower.CL), upper.CL = exp(upper.CL)) %>% 
+  left_join(skm, by = c("Treatment" = "Levels")) %>% 
+  ggplot(aes(x = Treatment, y = emmean, fill = Treatment)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -5.5) +
+  ylim(0, 50) +
+  labs(x = "Treatment", y = "Mortality (%)", subtitle = "(A)") +
+  theme_bw() +
+    theme(legend.position = "none",
+        axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black")
+        )  
+p1
+```
+
+### Efficacy
+
+```{r}
+# Model
+lme <- lmer(Efficacy ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+means <- emmeans(lme, pairwise ~ Treatment)
+```
+
+**Scott-Knott**
+
+```{r}
+ske <- with(efficacy,
+              SK(x= Treatment,
+                 y=Efficacy,
+                 model='y ~ x',
+                 which='x'))
+
+ske <- summary(ske)
+```
+
+**Bar chart**
+
+```{r fig.height=3, fig.width=4, dpi=300}
+p2 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  left_join(ske, by = c("Treatment" = "Levels")) %>% 
+  ggplot(aes(x = Treatment, y = emmean, fill = Treatment)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -3) +
+  ylim(0, 120) +
+  labs(x = "Treatment", y = "Efficacy (%)", subtitle = "(B)") +
+  theme_bw() +
+    theme(legend.position = "none",
+        axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black")
+        )
+p2
+```
+
+### Honey Yield
+
+```{r}
+# Model
+lme <- lmer(Honey_Yield ~ Treatment + (1|Replication) + (1|Conc.), data = efficacy)
+means <- emmeans(lme, pairwise ~ Treatment)
+```
+
+**Multiple comparison**
+
+
+**Scott-Knott**
+
+```{r}
+sky <- with(efficacy,
+              SK(x= Treatment,
+                 y=Honey_Yield,
+                 model='y ~ x',
+                 which='x'))
+
+sky <- summary(sky)
+```
+
+
+**Bar chart**
+
+```{r fig.height=3, fig.width=4, dpi=300}
+ p3 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  left_join(sky, by = c("Treatment" = "Levels")) %>% 
+  ggplot(aes(x = Treatment, y = emmean, fill = Treatment)) +
+  geom_bar(stat = "identity", position=position_dodge()) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -4) +
+  ylim(0, 20) +
+  labs(x = "Treatment", y = "Yield (kg)", subtitle = "(C)") +
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black")
+        )
+p3
+```
+
+### Combined charts
+
+```{r fig.height=9, fig.width=4,  dpi = 300}
+library(patchwork)
+
+p1 + p2 + p3 + 
+   plot_layout(ncol = 1)
+```
+
+
+## Nine Treatment Groups
+
+### Mortality
+
+```{r}
+# Model
+lme <- lmer(log(value) ~ Treatments + (1|Rep) + (1|Conc.) + (1|Week), data=mites)
+means <- emmeans(lme, pairwise ~ Treatments)
+```
+
+**Scott-Knott**
+
+```{r}
+skm <- with(mites,
+              SK(x= Treatments,
+                 y=log(value),
+                 model='y ~ x',
+                 which='x'))
+
+skm <- summary(skm)
+```
+
+**Bar chart**
+
+```{r fig.height=3, fig.width=4, dpi=300}
+p4 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  mutate(emmean = exp(emmean), SE = exp(SE), lower.CL = exp(lower.CL), upper.CL = exp(upper.CL)) %>% 
+  left_join(skm, by = c("Treatments" = "Levels")) %>% 
+  ggplot(aes(x = Treatments, y = emmean)) +
+  geom_bar(stat = "identity", position=position_dodge(), fill = "white", colour = "steelblue") +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -5.5) +
+  ylim(0, 70) +
+  labs(x = "Treatments", y = "Mortality (%)", subtitle = "(A)") +
+  theme_bw() +
+    theme(legend.position = "none",
+        #axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black"),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()
+        )
+p4
+```
+
+
+### Efficacy
+
+```{r}
+# Model
+lme <- lmer(Efficacy ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+means <- emmeans(lme, pairwise ~ Treatments)
+```
+
+**Scott-Knott**
+
+```{r}
+ske <- with(efficacy,
+              SK(x = Treatments,
+                 y = Efficacy,
+                 model='y ~ x',
+                 which='x'))
+
+ske <- summary(ske)
+```
+
+**Bar chart**
+
+```{r fig.height=3, fig.width=4, dpi=300}
+p5 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  left_join(ske, by = c("Treatments" = "Levels")) %>% 
+  ggplot(aes(x = Treatments, y = emmean)) +
+  geom_bar(stat = "identity", position=position_dodge(), fill = "white", colour = "steelblue") +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -1) +
+  ylim(0, 120) +
+  labs(x = "Treatments", y = "Efficacy (%)", subtitle = "(B)") +
+  theme_bw() +
+    theme(legend.position = "none",
+        #axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black"),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank()
+        )
+p5
+```
+
+
+### Honey Yield
+
+```{r}
+# Model
+lme <- lmer(Honey_Yield ~ Treatments + (1|Replication) + (1|Conc.), data = efficacy)
+means <- emmeans(lme, pairwise ~ Treatments)
+```
+
+**Scott-Knott**
+
+```{r}
+sky <- with(efficacy,
+              SK(x= Treatments,
+                 y=Honey_Yield,
+                 model='y ~ x',
+                 which='x'))
+
+sky <- summary(sky)
+```
+
+
+**Bar chart**
+
+```{r fig.height=4, fig.width=4, dpi=300}
+ p6 <- cld(means$emmeans) %>%
+  data.frame() %>% 
+  left_join(sky, by = c("Treatments" = "Levels")) %>% 
+  ggplot(aes(x = Treatments, y = emmean)) +
+  geom_bar(stat = "identity", position=position_dodge(), fill = "white", colour = "steelblue") +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL, width=.2)) +
+  geom_text(aes(label = `SK(5%)`, y = emmean + 0.05), size = 5, position = position_dodge(0.9), vjust = -2) +
+  ylim(0, 25) +
+  labs(x = "Treatment", y = "Yield (kg)", subtitle = "(C)") +
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(colour = "black"),
+        axis.text.y = element_text(colour = "black"),
+        axis.title.x = element_text(face = "bold"),
+        axis.title.y = element_text(face = "bold"),
+        panel.border = element_rect(color="black"),
+        strip.background = element_rect(color = "black")
+        ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+p6
+```
+
+### Combined charts
+
+```{r fig.height=9, fig.width=4,  dpi = 300}
+library(patchwork)
+
+p4 + p5 + p6 + 
+   plot_layout(ncol = 1)
+```
