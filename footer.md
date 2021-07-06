@@ -1,3 +1,3 @@
 
 
-Copyright 2021 Muhammad Mohsin Raza & Ziyad Abdul Qadir 
+Copyright 2021 Muhammad Mohsin Raza 
